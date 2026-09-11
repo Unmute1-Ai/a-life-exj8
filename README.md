@@ -1,12 +1,14 @@
 # A-Life EXJ8
 
+[Portfolio](https://github.com/Unmute1-Ai/Unmute1ai#readme) · [Engineering](https://github.com/Unmute1-Ai/U1Ai#readme) · [Security evidence](https://github.com/Unmute1-Ai/glass-box#readme)
+
 **Unmute1AI experimental project space.**
 
 This repository is reserved for the A-Life EXJ8 research/product track.
 
 > **Status: incubator.** No production artifact is currently committed here.
 
-Rather than inventing capabilities around an empty repository, this page records the minimum bar for turning A-Life EXJ8 into a credible project.
+This repository currently contains planning documentation. The technical objective and first implementation remain to be defined.
 
 ## Next release gate
 
