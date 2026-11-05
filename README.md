@@ -26,6 +26,10 @@ Open http://localhost:3000. Optional environment values: `MODEL_BASE_URL` (defau
 ## API
 - `GET /api/organism/turn`: provider readiness and specialist list.
 - `POST /api/organism/turn`: accepts `{ "input": "..." }`, returns routed specialists, synthesis, advisory authority state, and a SHA-256 digest.
+- `POST /api/organism/synthesize`: server-to-server MJ + Jake synthesis. Accepts the original input plus independent MJ and Jake assessments. Requires `Authorization: Bearer <COMPANION_SHARED_SECRET>`.
+
+## Companion integration
+The Myelin API calls the synthesis endpoint after the user selects Together and provides one-turn consent. Set `COMPANION_SHARED_SECRET` on this deployment and the identical value as `MJ_ORGANISM_COMPANION_TOKEN` on the Myelin API server. The endpoint fails closed when the credential or model provider is missing.
 
 ## Invariants and limitations
 **Intelligence recommends. Authority decides.** Confidence and specialist consensus never grant permissions. Real execution requires a separately implemented server-enforced U1Si-Q service with identity, scoped capabilities, approval policy, replay protection, and audit verification.
