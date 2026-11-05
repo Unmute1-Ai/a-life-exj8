@@ -12,15 +12,11 @@ type SynthesisInput = {
 async function callModel(system: string, payload: string): Promise<string> {
   const key = process.env.MODEL_API_KEY;
   if (!key) throw new Error("MODEL_NOT_CONFIGURED");
-
   const base = (process.env.MODEL_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
   const model = process.env.MODEL_NAME || "gpt-4o-mini";
   const response = await fetch(base + "/chat/completions", {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: "Bearer " + key,
-    },
+    headers: { "content-type": "application/json", authorization: "Bearer " + key },
     body: JSON.stringify({
       model,
       temperature: 0.2,
@@ -29,9 +25,8 @@ async function callModel(system: string, payload: string): Promise<string> {
         { role: "user", content: payload },
       ],
     }),
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(25_000),
   });
-
   if (!response.ok) throw new Error("MODEL_PROVIDER_ERROR_" + response.status);
   const data = await response.json();
   const answer = data?.choices?.[0]?.message?.content;
@@ -40,16 +35,27 @@ async function callModel(system: string, payload: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
+  const secret = process.env.COMPANION_SHARED_SECRET;
+  const authorization = request.headers.get("authorization") || "";
+  if (!secret) {
+    return NextResponse.json(
+      { error: "COMPANION_NOT_CONFIGURED", message: "The companion service credential is not configured." },
+      { status: 503 },
+    );
+  }
+  if (authorization !== "Bearer " + secret) {
+    return NextResponse.json({ error: "UNAUTHORIZED", message: "Companion service authentication failed." }, { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as SynthesisInput;
     const input = typeof body.input === "string" ? body.input.trim() : "";
     const mjAssessment = typeof body.mjAssessment === "string" ? body.mjAssessment.trim() : "";
     const jakeAssessment = typeof body.jakeAssessment === "string" ? body.jakeAssessment.trim() : "";
-
-    if (!input || input.length > 6000 || !mjAssessment || mjAssessment.length > 12000 ||
-        !jakeAssessment || jakeAssessment.length > 12000) {
+    if (!input || input.length > 6_000 || !mjAssessment || mjAssessment.length > 12_000 ||
+        !jakeAssessment || jakeAssessment.length > 12_000) {
       return NextResponse.json(
-        { error: "invalid_request", message: "Input and both specialist assessments are required within their size limits." },
+        { error: "INVALID_REQUEST", message: "Input and both specialist assessments are required within their size limits." },
         { status: 400 },
       );
     }
@@ -83,7 +89,7 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "UNKNOWN_ERROR";
     if (message === "MODEL_NOT_CONFIGURED") {
       return NextResponse.json(
-        { error: message, message: "The MJ model provider is not configured. No synthetic synthesis was generated." },
+        { error: message, message: "The MJ model provider is not configured. No synthesis was generated." },
         { status: 503 },
       );
     }
